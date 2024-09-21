@@ -1,0 +1,22 @@
+package {{.PackageName}}
+
+import (
+    "github.com/labstack/echo/v4"
+)
+
+type Create{{.Name}}Request struct {
+
+}
+
+type Create{{.Name}}Respone struct {
+
+}
+
+// @method		POST
+// @path		/{{.Name}}/:id
+// @response	Create{{.Name}}Respone
+// @body        Create{{.Name}}Request
+// @generateform
+func (u *{{.ControllerName}}) Create{{.Name}} (ctx echo.Context) error {
+    return nil
+}

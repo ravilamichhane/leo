@@ -1,0 +1,16 @@
+package {{.PackageName}}
+
+import (
+    "github.com/labstack/echo/v4"
+)
+
+type Deleete{{.Name}}Respone struct {
+
+}
+
+// @method		DELETE
+// @path		/{{.Name}}/:id
+// @response	Deleete{{.Name}}Respone
+func (u *{{.ControllerName}}) Delete{{.Name}} (ctx echo.Context) error {
+    return nil
+}

@@ -1,0 +1,19 @@
+package {{.PackageName}}
+
+import (
+    "github.com/labstack/echo/v4"
+)
+
+type {{.ControllerName}} struct {
+    // Inject Here
+}
+
+
+func (u *{{.ControllerName}}) addRoutes(e echo.Group) {
+        g := e.Group("/{{.LowerName}}")
+        g.GET("/", u.GetAll{{.Name}}s)
+		g.GET("/:id", u.Get{{.Name}}ById)
+		g.POST("", u.Create{{.Name}})
+		g.PUT("/:id", u.Update{{.Name}})
+		g.DELETE("/:id", u.Delete{{.Name}})
+}

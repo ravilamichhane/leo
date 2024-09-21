@@ -1,0 +1,16 @@
+package {{.PackageName}}
+
+import (
+    "github.com/labstack/echo/v4"
+)
+
+type Get{{.Name}}ByIdRespone struct {
+
+}
+
+// @method		Get
+// @path		/{{.Name}}/:id
+// @response	Get{{.Name}}ByIdRespone
+func (u *{{.ControllerName}}) Get{{.Name}}ById(ctx echo.Context) error {
+    return nil
+}
