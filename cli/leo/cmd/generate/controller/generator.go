@@ -29,6 +29,9 @@ var deleteRequest string
 //go:embed templates/getAll.txt
 var getAllRequest string
 
+//go:embed templates/barecontroller.txt
+var barecontroller string
+
 type ControllerData struct {
 	PackageName    string
 	ControllerName string
@@ -36,7 +39,7 @@ type ControllerData struct {
 	LowerName      string
 }
 
-func generateController(controllerName string) {
+func generateController(controllerName string, resource bool) {
 	data := ControllerData{
 		Name:           helpers.Capitalise(controllerName),
 		ControllerName: helpers.Capitalise(controllerName) + "Controller",
@@ -46,16 +49,22 @@ func generateController(controllerName string) {
 	controllerPath := "app/controllers/" + strings.ToLower(controllerName) + "controller/"
 
 	mainfile := controllerPath + strings.ToLower(controllerName) + "controller.go"
+	err := os.MkdirAll(filepath.Dir(mainfile), os.ModePerm)
+	if err != nil {
+		panic(err)
+	}
+
+	if !resource {
+		WriteFile(mainfile, barecontroller, data)
+
+		return
+	}
+
 	getfile := controllerPath + "Get" + data.Name + "ById.go"
 	createfile := controllerPath + "Create" + data.Name + ".go"
 	updatefile := controllerPath + "Update" + data.Name + ".go"
 	deletefile := controllerPath + "Delete" + data.Name + ".go"
 	getAllfile := controllerPath + "GetAll" + data.Name + ".go"
-
-	err := os.MkdirAll(filepath.Dir(mainfile), os.ModePerm)
-	if err != nil {
-		panic(err)
-	}
 
 	WriteFile(mainfile, controller, data)
 	WriteFile(getfile, getRequest, data)
