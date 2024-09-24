@@ -2,6 +2,7 @@ package goreact
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/buke/quickjs-go"
 	"github.com/ravilmc/leo/goreact/internal/reactbuilder"
@@ -33,6 +34,7 @@ type clientRenderResult struct {
 
 // Start starts the render task, returns the rendered html, css, and js for hydration
 func (rt *renderTask) Start() (string, string, string, error) {
+
 	rt.serverRenderResult = make(chan serverRenderResult)
 	rt.clientRenderResult = make(chan clientRenderResult)
 	// Assigns the parent file to the routeID so that the cache can be invalidated when the parent file changes
@@ -45,6 +47,7 @@ func (rt *renderTask) Start() (string, string, string, error) {
 	// Wait for both to finish
 	srResult := <-rt.serverRenderResult
 	if srResult.err != nil {
+		slog.Debug("ERROR", slog.Any("err", srResult.err.Error()))
 		rt.logger.Error().Err(srResult.err).Msg("Failed to build for server")
 		return "", "", "", srResult.err
 	}
@@ -76,9 +79,23 @@ func (rt *renderTask) doRender(buildType string) {
 	js := injectProps(build.JS, rt.props)
 	if buildType == "server" {
 		// Then call that file with node to get the rendered HTML
-		renderedHTML, err := renderReactToHTMLNew(js)
-		rt.serverRenderResult <- serverRenderResult{html: renderedHTML, css: build.CSS, err: err}
+		_, err := renderReactToHTMLNew(js)
+
+		rt.serverRenderResult <- serverRenderResult{html: `
+		<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="root" ></div>
+    
+</body>
+</html>`, css: build.CSS, err: err}
 	} else {
+
 		rt.clientRenderResult <- clientRenderResult{js: js, dependencies: build.Dependencies}
 	}
 }
@@ -146,6 +163,7 @@ func injectProps(compiledJS, props string) string {
 
 // renderReactToHTML uses node to execute the server js file which outputs the rendered HTML
 func renderReactToHTMLNew(js string) (string, error) {
+
 	rt := quickjs.NewRuntime()
 	defer rt.Close()
 	ctx := rt.NewContext()

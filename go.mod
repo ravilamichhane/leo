@@ -17,6 +17,7 @@ require (
 	github.com/stretchr/testify v1.9.0
 	github.com/tkrajina/typescriptify-golang-structs v0.1.10
 	golang.org/x/tools v0.6.0
+	rogchap.com/v8go v0.9.0
 )
 
 require (
@@ -26,6 +27,7 @@ require (
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/tidwall/go-node v0.1.0 // indirect
 	github.com/tkrajina/go-reflector v0.5.5 // indirect
 	golang.org/x/mod v0.8.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect

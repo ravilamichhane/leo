@@ -18,7 +18,7 @@ const ErrorTemplate = `<!DOCTYPE html>
   </head>
   <body>
 	<h1>An error occured</h1>
-	<code>{{ .Error }}</code>
+	<code>{{ . }}</code>
 	{{if .IsDev}}
 		<script>
 		  let socket = new WebSocket("ws://127.0.0.1:3001/ws");

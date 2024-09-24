@@ -1,6 +1,7 @@
 package reactbuilder
 
 import (
+	_ "embed"
 	"fmt"
 	"os"
 	"strings"
@@ -74,6 +75,7 @@ func BuildClient(buildContents, frontendDir, assetRoute string) (BuildResult, er
 		MinifyIdentifiers: os.Getenv("APP_ENV") == "production",
 		MinifySyntax:      os.Getenv("APP_ENV") == "production",
 		Loader:            loaders,
+		Tsconfig:          "../../tsconfig.json",
 	}
 	return build(opts, true)
 }

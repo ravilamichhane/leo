@@ -2,7 +2,7 @@ import React from "react";
 
 const Home = (props) => {
   React.useEffect(() => {
-    console.log("|HAHAHA", props);
+    console.log("", props);
   });
   return <div>Home {props.name}</div>;
 };

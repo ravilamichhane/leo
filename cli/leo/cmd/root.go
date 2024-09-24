@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/ravilmc/leo/cli/leo/cmd/generate"
+	"github.com/ravilmc/leo/cli/leo/cmd/update"
 	"github.com/spf13/cobra"
 )
 
@@ -29,6 +30,7 @@ func Execute() {
 func init() {
 
 	rootCmd.AddCommand(generate.GenerateCmd)
+	rootCmd.AddCommand(update.UpdateCmd)
 
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
