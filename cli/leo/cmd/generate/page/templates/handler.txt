@@ -1,0 +1,21 @@
+package {{.PackageName}}
+
+import (
+	"leoapp/app/engine"
+    
+	"github.com/labstack/echo/v4"
+	"github.com/ravilmc/reactssr"
+)
+
+const PATH = "{{.Path}}"
+
+func Page(ctx echo.Context) error {
+    	template := engine.Engine.RenderRoute(reactssr.RenderConfig{
+		File:  "{{.FilePath}}",
+		Title: "Big Bracket Esports",
+	})
+    
+    return ctx.HTML(200, string(template))
+}
+
+var Middlewares = []echo.MiddlewareFunc{}

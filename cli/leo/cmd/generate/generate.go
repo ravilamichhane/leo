@@ -6,6 +6,7 @@ import (
 	"github.com/ravilmc/leo/cli/leo/cmd/generate/controller"
 	"github.com/ravilmc/leo/cli/leo/cmd/generate/fetchers"
 	"github.com/ravilmc/leo/cli/leo/cmd/generate/forms"
+	"github.com/ravilmc/leo/cli/leo/cmd/generate/page"
 	"github.com/spf13/cobra"
 )
 
@@ -37,6 +38,8 @@ func init() {
 	GenerateCmd.AddCommand(fetchers.FetcherCmd)
 	GenerateCmd.AddCommand(controller.ControllerCmd)
 	GenerateCmd.AddCommand(forms.FormsCmd)
+	GenerateCmd.AddCommand(page.PageCmd)
+
 }
 
 func generateModel(modelName string) {

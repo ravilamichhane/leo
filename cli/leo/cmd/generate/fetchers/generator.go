@@ -25,13 +25,6 @@ func generate(name string) {
 
 	basepackageName := ""
 
-	// Read the first line
-	if scanner.Scan() {
-		firstLine := scanner.Text()
-		withoutModule := strings.Replace(firstLine, "module", "", 1)
-		basepackageName = strings.TrimSpace(withoutModule)
-	}
-
 	// Check for scanning error
 	if err := scanner.Err(); err != nil {
 		fmt.Println("Error reading file:", err)

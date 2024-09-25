@@ -8,6 +8,7 @@ import (
 
 	"github.com/ravilmc/leo/cli/leo/cmd/generate"
 	"github.com/ravilmc/leo/cli/leo/cmd/update"
+	"github.com/ravilmc/leo/cli/leo/cmd/watch"
 	"github.com/spf13/cobra"
 )
 
@@ -31,6 +32,7 @@ func init() {
 
 	rootCmd.AddCommand(generate.GenerateCmd)
 	rootCmd.AddCommand(update.UpdateCmd)
+	rootCmd.AddCommand(watch.WatchCmd)
 
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
