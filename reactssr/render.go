@@ -1,4 +1,4 @@
-package goreact
+package go_ssr
 
 import (
 	"encoding/json"
@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/ravilmc/leo/goreact/internal/html"
-	"github.com/ravilmc/leo/goreact/internal/utils"
+	"github.com/ravilmc/leo/reactssr/packages/html"
+	"github.com/ravilmc/leo/reactssr/packages/utils"
 	"github.com/rs/zerolog"
 )
 
@@ -23,7 +23,6 @@ type RenderConfig struct {
 
 // RenderRoute renders a route to html
 func (engine *Engine) RenderRoute(renderConfig RenderConfig) []byte {
-
 	// routeID is the program counter of the caller
 	pc, _, _, _ := runtime.Caller(1)
 	routeID := fmt.Sprint(pc)
@@ -32,7 +31,6 @@ func (engine *Engine) RenderRoute(renderConfig RenderConfig) []byte {
 	if err != nil {
 		return html.RenderError(err, routeID)
 	}
-
 	task := renderTask{
 		engine:   engine,
 		logger:   zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).With().Timestamp().Logger(),
@@ -42,7 +40,6 @@ func (engine *Engine) RenderRoute(renderConfig RenderConfig) []byte {
 		config:   renderConfig,
 	}
 	renderedHTML, css, js, err := task.Start()
-
 	if err != nil {
 		return html.RenderError(err, task.routeID)
 	}

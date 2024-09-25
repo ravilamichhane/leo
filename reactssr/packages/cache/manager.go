@@ -3,7 +3,7 @@ package cache
 import (
 	"sync"
 
-	"github.com/ravilmc/leo/goreact/internal/reactbuilder"
+	"github.com/ravilmc/leo/reactssr/packages/reactbuilder"
 )
 
 type Manager struct {

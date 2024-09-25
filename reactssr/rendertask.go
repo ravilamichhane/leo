@@ -1,11 +1,14 @@
-package goreact
+package go_ssr
 
 import (
+	"errors"
 	"fmt"
-	"log/slog"
+	"os"
+	"os/exec"
+	"strings"
 
-	"github.com/buke/quickjs-go"
-	"github.com/ravilmc/leo/goreact/internal/reactbuilder"
+	"github.com/ravilmc/leo/reactssr/packages/reactbuilder"
+	"github.com/ravilmc/leo/reactssr/packages/utils"
 	"github.com/rs/zerolog"
 )
 
@@ -34,7 +37,6 @@ type clientRenderResult struct {
 
 // Start starts the render task, returns the rendered html, css, and js for hydration
 func (rt *renderTask) Start() (string, string, string, error) {
-
 	rt.serverRenderResult = make(chan serverRenderResult)
 	rt.clientRenderResult = make(chan clientRenderResult)
 	// Assigns the parent file to the routeID so that the cache can be invalidated when the parent file changes
@@ -47,7 +49,6 @@ func (rt *renderTask) Start() (string, string, string, error) {
 	// Wait for both to finish
 	srResult := <-rt.serverRenderResult
 	if srResult.err != nil {
-		slog.Debug("ERROR", slog.Any("err", srResult.err.Error()))
 		rt.logger.Error().Err(srResult.err).Msg("Failed to build for server")
 		return "", "", "", srResult.err
 	}
@@ -78,24 +79,16 @@ func (rt *renderTask) doRender(buildType string) {
 	// JS is built without props so that the props can be injected into cached JS builds
 	js := injectProps(build.JS, rt.props)
 	if buildType == "server" {
+		// Save the server js to a file to be executed by node
+		jsFilePath, err := rt.saveServerRenderFile(js)
+		if err != nil {
+			rt.handleBuildError(err, buildType)
+			return
+		}
 		// Then call that file with node to get the rendered HTML
-		_, err := renderReactToHTMLNew(js)
-
-		rt.serverRenderResult <- serverRenderResult{html: `
-		<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <div id="root" ></div>
-    
-</body>
-</html>`, css: build.CSS, err: err}
+		renderedHTML, err := renderReactToHTML(jsFilePath)
+		rt.serverRenderResult <- serverRenderResult{html: renderedHTML, css: build.CSS, err: err}
 	} else {
-
 		rt.clientRenderResult <- clientRenderResult{js: js, dependencies: build.Dependencies}
 	}
 }
@@ -161,16 +154,26 @@ func injectProps(compiledJS, props string) string {
 	return fmt.Sprintf(`var props = %s; %s`, props, compiledJS)
 }
 
-// renderReactToHTML uses node to execute the server js file which outputs the rendered HTML
-func renderReactToHTMLNew(js string) (string, error) {
-
-	rt := quickjs.NewRuntime()
-	defer rt.Close()
-	ctx := rt.NewContext()
-	defer ctx.Close()
-	res, err := ctx.Eval(js)
+// saveServerRenderFile saves the generated server js to a file to be executed by node
+func (rt *renderTask) saveServerRenderFile(js string) (string, error) {
+	cacheDir, err := utils.GetServerBuildCacheDir(rt.routeID)
 	if err != nil {
 		return "", err
 	}
-	return res.String(), nil
+	jsFilePath := fmt.Sprintf("%s/render.js", cacheDir)
+	return jsFilePath, os.WriteFile(jsFilePath, []byte(js), 0644)
+}
+
+// renderReactToHTML uses node to execute the server js file which outputs the rendered HTML
+func renderReactToHTML(jsFilePath string) (string, error) {
+	cmd := exec.Command("node", jsFilePath)
+	stdOut := new(strings.Builder)
+	stdErr := new(strings.Builder)
+	cmd.Stdout = stdOut
+	cmd.Stderr = stdErr
+	err := cmd.Run()
+	if err != nil {
+		return "", errors.New(stdErr.String())
+	}
+	return stdOut.String(), nil
 }

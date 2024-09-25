@@ -1,11 +1,11 @@
-package goreact
+package go_ssr
 
 import (
 	"fmt"
 	"os"
 	"path"
 
-	"github.com/ravilmc/leo/goreact/internal/utils"
+	"github.com/ravilmc/leo/reactssr/packages/utils"
 )
 
 // Config is the config for starting the engine

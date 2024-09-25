@@ -1,7 +1,9 @@
-package goreact
+package go_ssr
 
 import (
 	"fmt"
+	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -9,13 +11,11 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/gorilla/websocket"
-	"github.com/ravilmc/leo/goreact/internal/utils"
-	"github.com/rs/zerolog"
+	"github.com/ravilmc/leo/reactssr/packages/utils"
 )
 
 type HotReload struct {
 	engine           *Engine
-	logger           zerolog.Logger
 	connectedClients map[string][]*websocket.Conn
 }
 
@@ -23,7 +23,6 @@ type HotReload struct {
 func newHotReload(engine *Engine) *HotReload {
 	return &HotReload{
 		engine:           engine,
-		logger:           engine.Logger,
 		connectedClients: make(map[string][]*websocket.Conn),
 	}
 }
@@ -36,7 +35,7 @@ func (hr *HotReload) Start() {
 
 // startServer starts the hot reload websocket server
 func (hr *HotReload) startServer() {
-	hr.logger.Info().Msgf("Hot reload websocket running on port %d", hr.engine.Config.HotReloadServerPort)
+	slog.Info(fmt.Sprintf("Hot reload websocket running on port %d", hr.engine.Config.HotReloadServerPort))
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			return true
@@ -45,18 +44,18 @@ func (hr *HotReload) startServer() {
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		ws, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
-			hr.logger.Err(err).Msg("Failed to upgrade websocket")
+			slog.Error("Failed to upgrade websocket")
 			return
 		}
 		// Client should send routeID as first message
 		_, routeID, err := ws.ReadMessage()
 		if err != nil {
-			hr.logger.Err(err).Msg("Failed to read message from websocket")
+			slog.Error("Failed to read message from websocket")
 			return
 		}
 		err = ws.WriteMessage(1, []byte("Connected"))
 		if err != nil {
-			hr.logger.Err(err).Msg("Failed to write message to websocket")
+			slog.Error("Failed to write message to websocket")
 			return
 		}
 		// Add client to connectedClients
@@ -64,7 +63,7 @@ func (hr *HotReload) startServer() {
 	})
 	err := http.ListenAndServe(fmt.Sprintf(":%d", hr.engine.Config.HotReloadServerPort), nil)
 	if err != nil {
-		hr.logger.Err(err).Msg("Hot reload server quit unexpectedly")
+		slog.Error("Hot reload server quit unexpectedly")
 	}
 }
 
@@ -72,7 +71,7 @@ func (hr *HotReload) startServer() {
 func (hr *HotReload) startWatcher() {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		hr.logger.Err(err).Msg("Failed to start watcher")
+		slog.Error("Failed to start watcher")
 		return
 	}
 	defer watcher.Close()
@@ -83,7 +82,7 @@ func (hr *HotReload) startWatcher() {
 		}
 		return nil
 	}); err != nil {
-		hr.logger.Err(err).Msg("Failed to add files in directory to watcher")
+		slog.Error("Failed to add files in directory to watcher")
 		return
 	}
 
@@ -93,21 +92,24 @@ func (hr *HotReload) startWatcher() {
 			// Watch for file created, deleted, updated, or renamed events
 			if event.Op.String() != "CHMOD" && !strings.Contains(event.Name, "gossr-temporary") {
 				filePath := utils.GetFullFilePath(event.Name)
-				hr.logger.Info().Msgf("File changed: %s, reloading", filePath)
+				slog.Info("Frontend Files Changed Reloading....")
 				// Store the routes that need to be reloaded
 				var routeIDS []string
 				switch {
 				case filePath == hr.engine.Config.LayoutFilePath: // If the layout file has been updated, reload all routes
+					if err := hr.engine.BuildLayoutCSSFile(); err != nil {
+						slog.Error("Failed to build global css file")
+					}
 					routeIDS = hr.engine.CacheManager.GetAllRouteIDS()
 				case hr.layoutCSSFileUpdated(filePath): // If the global css file has been updated, rebuild it and reload all routes
 					if err := hr.engine.BuildLayoutCSSFile(); err != nil {
-						hr.logger.Err(err).Msg("Failed to build global css file")
+						slog.Error("Failed to build global css file")
 						continue
 					}
 					routeIDS = hr.engine.CacheManager.GetAllRouteIDS()
 				case hr.needsTailwindRecompile(filePath): // If tailwind is enabled and a React file has been updated, rebuild the global css file and reload all routes
 					if err := hr.engine.BuildLayoutCSSFile(); err != nil {
-						hr.logger.Err(err).Msg("Failed to build global css file")
+						slog.Error("Failed to build global css file")
 						continue
 					}
 					fallthrough
@@ -126,7 +128,7 @@ func (hr *HotReload) startWatcher() {
 
 			}
 		case err := <-watcher.Errors:
-			hr.logger.Err(err).Msg("Error watching files")
+			slog.Error("Error watching files", slog.Any("error", err))
 		}
 	}
 }
@@ -141,6 +143,8 @@ func (hr *HotReload) needsTailwindRecompile(filePath string) bool {
 	if hr.engine.Config.TailwindConfigPath == "" {
 		return false
 	}
+
+	log.Println(filePath)
 	fileTypes := []string{".tsx", ".ts", ".jsx", ".js"}
 	for _, fileType := range fileTypes {
 		if strings.HasSuffix(filePath, fileType) {

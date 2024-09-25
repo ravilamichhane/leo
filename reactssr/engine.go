@@ -1,11 +1,11 @@
-package goreact
+package go_ssr
 
 import (
 	"os"
 
-	"github.com/ravilmc/leo/goreact/internal/cache"
-	"github.com/ravilmc/leo/goreact/internal/typeconverter"
-	"github.com/ravilmc/leo/goreact/internal/utils"
+	"github.com/ravilmc/leo/reactssr/packages/cache"
+	"github.com/ravilmc/leo/reactssr/packages/typeconverter"
+	"github.com/ravilmc/leo/reactssr/packages/utils"
 	"github.com/rs/zerolog"
 )
 

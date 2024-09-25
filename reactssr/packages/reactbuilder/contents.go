@@ -11,8 +11,8 @@ import React from "react";
 import App from "{{ .FilePath }}";
 {{ if .SuppressConsoleLog }}console.log = () => {};{{ end }}
 {{ .RenderFunction }}`
-var serverRenderFunction = `renderToString(<App {...props} />);`
-var serverRenderFunctionWithLayout = `renderToString(<Layout><App {...props} /></Layout>);`
+var serverRenderFunction = `process.stdout.write(renderToString(<App {...props} />))`
+var serverRenderFunctionWithLayout = `process.stdout.write(renderToString(<Layout><App {...props} /></Layout>))`
 var clientRenderFunction = `hydrateRoot(document.getElementById("root"), <App {...props} />);`
 var clientRenderFunctionWithLayout = `hydrateRoot(document.getElementById("root"), <Layout><App {...props} /></Layout>);`
 
@@ -30,7 +30,7 @@ func buildWithTemplate(buildTemplate string, params map[string]interface{}) (str
 }
 
 func GenerateServerBuildContents(imports []string, filePath string, useLayout bool) (string, error) {
-	imports = append(imports, `import { renderToString } from "react-dom/server.browser";`)
+	imports = append(imports, `import { renderToString } from "react-dom/server";`)
 	params := map[string]interface{}{
 		"Imports":            imports,
 		"FilePath":           filePath,

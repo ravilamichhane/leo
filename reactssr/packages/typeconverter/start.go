@@ -3,7 +3,7 @@ package typeconverter
 import (
 	"os/exec"
 
-	"github.com/ravilmc/leo/goreact/internal/utils"
+	"github.com/ravilmc/leo/reactssr/packages/utils"
 	_ "github.com/tkrajina/typescriptify-golang-structs/typescriptify"
 )
 
