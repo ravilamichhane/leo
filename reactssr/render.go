@@ -4,13 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"os"
 	"path/filepath"
 	"runtime"
 
 	"github.com/ravilmc/leo/reactssr/packages/html"
 	"github.com/ravilmc/leo/reactssr/packages/utils"
-	"github.com/rs/zerolog"
 )
 
 // RenderConfig is the config for rendering a route
@@ -33,7 +31,6 @@ func (engine *Engine) RenderRoute(renderConfig RenderConfig) []byte {
 	}
 	task := renderTask{
 		engine:   engine,
-		logger:   zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).With().Timestamp().Logger(),
 		routeID:  routeID,
 		props:    props,
 		filePath: filepath.ToSlash(utils.GetFullFilePath(engine.Config.FrontendDir + "/" + renderConfig.File)),

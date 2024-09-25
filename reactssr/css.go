@@ -2,6 +2,7 @@ package go_ssr
 
 import (
 	"io"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -23,7 +24,7 @@ func (engine *Engine) BuildLayoutCSSFile() error {
 		engine.CachedLayoutCSSFilePath = cachedCSSFilePath
 	}
 	if engine.Config.TailwindConfigPath != "" {
-		engine.Logger.Debug().Msg("Building css file with tailwind")
+		slog.Debug("Building css file with tailwind")
 		return engine.buildCSSWithTailwind()
 	}
 	return nil

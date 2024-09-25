@@ -3,18 +3,17 @@ package go_ssr
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 	"strings"
 
 	"github.com/ravilmc/leo/reactssr/packages/reactbuilder"
 	"github.com/ravilmc/leo/reactssr/packages/utils"
-	"github.com/rs/zerolog"
 )
 
 type renderTask struct {
 	engine             *Engine
-	logger             zerolog.Logger
 	routeID            string
 	filePath           string
 	props              string
@@ -49,12 +48,12 @@ func (rt *renderTask) Start() (string, string, string, error) {
 	// Wait for both to finish
 	srResult := <-rt.serverRenderResult
 	if srResult.err != nil {
-		rt.logger.Error().Err(srResult.err).Msg("Failed to build for server")
+		slog.Error("Failed to build for server")
 		return "", "", "", srResult.err
 	}
 	crResult := <-rt.clientRenderResult
 	if crResult.err != nil {
-		rt.logger.Error().Err(crResult.err).Msg("Failed to build for client")
+		slog.Error("Failed to build for client")
 		return "", "", "", crResult.err
 	}
 
