@@ -1,0 +1,23 @@
+package {{.PackageName}}
+
+import (
+    "github.com/ravilmc/leo "
+)
+
+type {{.Name}}Response struct {
+    // Your Type Here
+}
+
+// @method		{{.Method}}
+// @path		{{.Path}}
+// @response	{{.Name}}Response
+func  {{.Name}} (ctx leo.Context) error {
+    var response {{.Name}}Response
+
+// HandlerLogic
+
+    return ctx.JSON(200 , response)
+}
+
+
+var Middlewares = []leo.MiddlewareFunc{}

@@ -3,10 +3,11 @@ package generate
 import (
 	"log"
 
-	"github.com/ravilmc/leo/cli/leo/cmd/generate/controller"
+	"github.com/ravilmc/leo/cli/leo/cmd/generate/api"
 	"github.com/ravilmc/leo/cli/leo/cmd/generate/fetchers"
 	"github.com/ravilmc/leo/cli/leo/cmd/generate/forms"
 	"github.com/ravilmc/leo/cli/leo/cmd/generate/page"
+	"github.com/ravilmc/leo/cli/leo/cmd/generate/routetree"
 	"github.com/spf13/cobra"
 )
 
@@ -36,8 +37,9 @@ var GenerateCmd = &cobra.Command{
 
 func init() {
 	GenerateCmd.AddCommand(fetchers.FetcherCmd)
-	GenerateCmd.AddCommand(controller.ControllerCmd)
+	GenerateCmd.AddCommand(api.ApiCmd)
 	GenerateCmd.AddCommand(forms.FormsCmd)
+	GenerateCmd.AddCommand(routetree.RouteTreeCmd)
 	GenerateCmd.AddCommand(page.PageCmd)
 
 }

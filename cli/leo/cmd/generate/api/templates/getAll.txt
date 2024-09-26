@@ -1,0 +1,31 @@
+package {{.PackageName}}
+
+import (
+    "github.com/ravilmc/leo"
+)
+
+type {{.Name}}Response struct {
+    // Your Type Here
+}
+
+// @method		{{.Method}}
+// @path		{{.Path}}
+// @response	Page<{{.Name}}Response>
+func  {{.Name}} (ctx leo.Context) error {
+    var response {{.Name}}Response
+
+    query := db.Where("id > ?", 1)
+    pg := paginate.New()
+    page := pg.With(stmt).Request(req).Response(&response)
+
+    if page.Error != nil {
+        return ctx.JSON
+    }
+
+// HandlerLogic
+
+    return ctx.JSON(200 , page)
+}
+
+
+var Middlewares = []leo.MiddlewareFunc{}

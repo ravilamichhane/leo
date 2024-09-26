@@ -47,14 +47,21 @@ var WatchCmd = &cobra.Command{
 					if strings.Contains(event.Name, ".") {
 						if strings.Contains(event.Name, ".go") {
 							if strings.Contains(event.Name, "/routes/api/") {
-
 								dir := path.Dir(event.Name)
+
+								splitted := strings.Split(dir, "/routes/api")
+								slog.Debug("START", slog.String("dir", dir))
+								slog.Debug("START", slog.Any("splitted", splitted))
+
+								path := "github.com/ravilmc/leoapp/app/routes/api" + splitted[1]
+
+								slog.Debug("START", slog.String("path", path))
 
 								slog.Info("generating api types and fetcher")
 								gen := tygo.New(&tygo.Config{
 									Packages: []*tygo.PackageConfig{
 										{
-											Path:       dir,
+											Path:       path,
 											OutputPath: dir + "/api.ts",
 											Frontmatter: `
 							import { Fetcher, handleResponseError } from "./fetcher";
@@ -80,6 +87,7 @@ var WatchCmd = &cobra.Command{
 								})
 
 								err = gen.Generate()
+
 								if err == nil {
 
 									cmd := exec.Command("./node_modules/.bin/prettier", dir+"/api.ts", "--write")
@@ -91,11 +99,14 @@ var WatchCmd = &cobra.Command{
 									}
 
 									fmt.Println(string(stdout))
+								} else {
+									slog.Error("generating api types", slog.Any("error", err))
 								}
 
 								// Print the output
 
 							} else {
+
 								slog.Info("generating page types")
 
 							}

@@ -1,9 +1,9 @@
 package {{.PackageName}}
 
 import (
-	"leoapp/app/engine"
+	"github.com/ravilmc/leoapp/app/engine"
     
-	"github.com/labstack/echo/v4"
+	"github.com/ravilmc/leo"
 	"github.com/ravilmc/reactssr"
 )
 
@@ -11,7 +11,7 @@ const PATH = "{{.Path}}"
 
 func Page(ctx echo.Context) error {
     	template := engine.Engine.RenderRoute(reactssr.RenderConfig{
-		File:  "{{.FilePath}}",
+		File:  "{{.ComponentPath}}",
 		Title: "Big Bracket Esports",
 	})
     

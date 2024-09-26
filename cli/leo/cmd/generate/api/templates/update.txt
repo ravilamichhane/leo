@@ -1,0 +1,24 @@
+package {{.PackageName}}
+
+import (
+    "github.com/ravilmc/leo"
+)
+
+type {{.Name}}Request struct {
+
+}
+
+type {{.Name}}Respone struct {
+
+}
+
+// @method		{{.Method}}
+// @path		{{.Path}}
+// @response	Update{{.Name}}Respone
+// @body        Update{{.Name}}Request
+// @generateform
+func (u *{{.ControllerName}}) Update{{.Name}} (ctx leo.Context) error {
+    var response {{.Name}}Respone 
+    AAAAAAAAAAAAAA                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+    return ctx.JSON(200, response)
+}

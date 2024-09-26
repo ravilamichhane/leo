@@ -1,0 +1,10 @@
+package main
+
+import(
+{{range $val := .}}	{{$val.Name}}  "{{$val.Import}}"{{end}}
+)
+
+func (app *application) AddRoutes() {
+{{range $val := .}}    app.Server.GET({{$val.Name}}.PATH, {{$val.Name}}.Page, {{$val.Name}}.Middlewares...)
+{{end}}
+}
