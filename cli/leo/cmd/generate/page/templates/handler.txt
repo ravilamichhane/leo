@@ -3,19 +3,27 @@ package {{.PackageName}}
 import (
 	"github.com/ravilmc/leoapp/app/engine"
     
+	"github.com/labstack/echo/v4"
 	"github.com/ravilmc/leo"
 	"github.com/ravilmc/reactssr"
 )
 
-const PATH = "{{.Path}}"
+var Handler = leo.Route{
+	Path:        "{{.Path}}",
+	Method:      "GET",
+	Middlewares: []echo.MiddlewareFunc{},
+	Handler: func(ctx echo.Context) error {
+		template := engine.Engine.RenderRoute(reactssr.RenderConfig{
+			File:  "{{.ComponentPath}}",
+			Title: "Big Bracket Esports",
+		})
 
-func Page(ctx echo.Context) error {
-    	template := engine.Engine.RenderRoute(reactssr.RenderConfig{
-		File:  "{{.ComponentPath}}",
-		Title: "Big Bracket Esports",
-	})
-    
-    return ctx.HTML(200, string(template))
+		return ctx.HTML(200, string(template))
+	},
 }
 
-var Middlewares = []echo.MiddlewareFunc{}
+
+var Routes = []leo.Route{
+	
+}
+

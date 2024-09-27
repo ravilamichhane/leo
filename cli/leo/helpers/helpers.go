@@ -12,6 +12,7 @@ import (
 type PageData struct {
 	PackageName    string
 	Path           string
+	ApiPath        string
 	FilePath       string
 	GenerationPath string
 	Paginate       bool
@@ -39,6 +40,7 @@ func GetPathInfo(generationName string) PageData {
 		PackageName:    strings.ReplaceAll(packagename, "_", ""),
 		Path:           "/" + strings.ReplaceAll(route_path[1], "_", ":"),
 		FilePath:       "routes/" + route_path[1] + "/" + generationName,
+		ApiPath:        "/api/" + strings.ReplaceAll(route_path[1], "_", ":"),
 		GenerationPath: cwd + "/" + generationName,
 		Method:         "GET",
 		ComponentPath:  "routes/" + route_path[1] + "/page.tsx",

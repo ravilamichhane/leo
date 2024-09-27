@@ -2,21 +2,27 @@ package {{.PackageName}}
 
 import (
     "github.com/labstack/echo/v4"
+	"github.com/ravilmc/leo"
 )
 
-type Create{{.Name}}Request struct {
-
+type {{.Name}}Request struct {
+    // Your Type Here
 }
 
-type Create{{.Name}}Respone struct {
-
+type {{.Name}}Response struct {
+    // Your Type Here
 }
 
-// @method		POST
-// @path		/{{.Name}}/:id
-// @response	Create{{.Name}}Respone
-// @body        Create{{.Name}}Request
+// @response	{{.Name}}Respone
+// @body        {{.Name}}Request
 // @generateform
-func (u *{{.ControllerName}}) Create{{.Name}} (ctx echo.Context) error {
-    return nil
+var {{.Name}} = leo.Route{
+	Path:        "{{.Path}}",
+	Method:      "{{.Method}}",
+	Middlewares: []echo.MiddlewareFunc{},
+	Handler: func(ctx echo.Context) error {
+        var response {{.Name}}Response
+
+		return ctx.JSON(200 , response)
+	},
 }

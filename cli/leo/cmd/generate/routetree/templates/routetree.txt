@@ -1,10 +1,19 @@
 package main
 
 import(
-{{range $val := .}}	{{$val.Name}}  "{{$val.Import}}"{{end}}
+    "github.com/ravilmc/leo"
+{{range $val := .}}	{{$val.Name}}  "{{$val.Import}}"
+{{end}}
 )
 
 func (app *application) AddRoutes() {
-{{range $val := .}}    app.Server.GET({{$val.Name}}.PATH, {{$val.Name}}.Page, {{$val.Name}}.Middlewares...)
-{{end}}
+    all_routes := make([]leo.Route , 0)
+
+{{range $val := .}}
+    all_routes = append(all_routes, {{$val.Name}}.Routes...){{end}}
+
+    for _ , v := range all_routes {
+        app.Server.Add(v.Method, v.Path, v.Handler , v.Middlewares...)
+    }
+
 }

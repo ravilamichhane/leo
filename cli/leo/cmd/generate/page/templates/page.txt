@@ -1,5 +1,5 @@
 function Page(props){
-    return <div>Page</div>
+    return <div>Hello {{.Path}}</div>
 }
 
 export default Page
