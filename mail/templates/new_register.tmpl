@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+   <h1>Thanks for Registering</h1>
+
+    <p>Hello {{.Name}},</p>
+
+    <p>Your have successfully registered for Service.</p>
+    <p>If you did not register, please ignore this message.</p>
+    <p> If it was you please enter the OTP below to verify your account</p>
+
+    <p>OTP: {{.OTP}}</p>
+
+    <p>You can also click the link below to verify your account</p>
+
+    <a href="{{.Link}}">Verify Account</a>
+
+    <p>Thanks,</p>
+ 
+</body>
+</html>
