@@ -5,7 +5,6 @@ import (
 	_ "embed"
 	"fmt"
 	"html/template"
-	"log"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -61,15 +60,13 @@ var RouteTreeCmd = &cobra.Command{
 			return
 		}
 
-		slog.Debug("name:" + basepackageName)
-
 		if basepackageName == "" {
 			slog.Error("Invalid package")
 			return
 		}
 		handlers := make([]HandlerData, 0)
 
-		err = filepath.Walk(cwd+"/app/routes", func(path string, info os.FileInfo, err error) error {
+		filepath.Walk(cwd+"/app/routes", func(path string, info os.FileInfo, err error) error {
 
 			if strings.Contains(path, "/app/routes/api") {
 				return nil
@@ -99,40 +96,34 @@ var RouteTreeCmd = &cobra.Command{
 				slog.Error("error adding directory to watcher", slog.Any("err", err))
 				return fmt.Errorf("error adding directory to watcher: %w", err)
 			}
-
-			template, err := template.New(uuid.New().String()).Parse(routetree)
-
-			if err != nil {
-				panic(err)
-			}
-
-			f, err := os.Create(cwd + "/routes.go")
-
-			if err != nil {
-				panic(err)
-			}
-
-			defer f.Close()
-
-			file, err := os.OpenFile(cwd+"/routes.go", os.O_APPEND|os.O_WRONLY, os.ModeAppend)
-
-			if err != nil {
-				panic(err)
-			}
-
-			defer file.Close()
-			err = template.Execute(file, handlers)
-
-			if err != nil {
-				panic(err)
-			}
-
-			log.Println(handlers)
 			return nil
 		})
+
+		template, err := template.New(uuid.New().String()).Parse(routetree)
+
 		if err != nil {
-			return
+			panic(err)
 		}
 
+		f, err := os.Create(cwd + "/routes.go")
+
+		if err != nil {
+			panic(err)
+		}
+
+		defer f.Close()
+
+		newfile, err := os.OpenFile(cwd+"/routes.go", os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+
+		if err != nil {
+			panic(err)
+		}
+
+		defer newfile.Close()
+		err = template.Execute(newfile, handlers)
+
+		if err != nil {
+			panic(err)
+		}
 	},
 }

@@ -46,28 +46,27 @@ var WatchCmd = &cobra.Command{
 					}
 					if strings.Contains(event.Name, ".") {
 						if strings.Contains(event.Name, ".go") {
-							if strings.Contains(event.Name, "/routes/api/") {
-								dir := path.Dir(event.Name)
+							dir := path.Dir(event.Name)
 
-								splitted := strings.Split(dir, "/routes/api")
-								slog.Debug("START", slog.String("dir", dir))
-								slog.Debug("START", slog.Any("splitted", splitted))
+							splitted := strings.Split(dir, "/routes")
+							slog.Debug("START", slog.String("dir", dir))
+							slog.Debug("START", slog.Any("splitted", splitted))
 
-								path := "github.com/ravilmc/leoapp/app/routes/api" + splitted[1]
+							path := "github.com/ravilmc/leoapp/app/routes" + splitted[1]
 
-								slog.Debug("START", slog.String("path", path))
+							slog.Debug("START", slog.String("path", path))
 
-								slog.Info("generating api types and fetcher")
-								gen := tygo.New(&tygo.Config{
-									Packages: []*tygo.PackageConfig{
-										{
-											Path:       path,
-											OutputPath: dir + "/api.ts",
-											Frontmatter: `
-							import { Fetcher, handleResponseError } from "./fetcher";
+							slog.Info("generating api types and fetcher")
+							gen := tygo.New(&tygo.Config{
+								Packages: []*tygo.PackageConfig{
+									{
+										Path:       path,
+										OutputPath: dir + "/api.ts",
+										Frontmatter: `
+							import { Fetcher, handleResponseError } from "@/lib/fetcher";
 							import {useForm} from "react-hook-form";
-							import { SafeParse } from "./safeparse";
-							import { generateFormData } from "./formdata";
+							import {Page} from "@/types/page";
+							import { SafeParse ,generateFormdata } from "@/lib/utils";
 							import { useMutation } from "@tanstack/react-query";
 							import { Form } from "@/components/ui/form";
 							import { Button } from "@/components/ui/button";
@@ -79,37 +78,38 @@ var WatchCmd = &cobra.Command{
 							import { TextInput } from "@/components/forms/text-input";
 							
 											`,
-											TypeMappings: map[string]string{
-												"time.Time": "string",
-											},
+										TypeMappings: map[string]string{
+											"time.Time":      "string",
+											"web.FileUpload": "File",
 										},
+										ExcludeFiles: []string{"handler.go"},
 									},
-								})
+								},
+							})
 
-								err = gen.Generate()
+							err = gen.Generate()
 
-								if err == nil {
+							if err == nil {
 
-									cmd := exec.Command("./node_modules/.bin/prettier", dir+"/api.ts", "--write")
-									stdout, err := cmd.Output()
+								cmd := exec.Command("./node_modules/.bin/prettier", dir+"/api.ts", "--write")
+								stdout, err := cmd.Output()
 
-									if err != nil {
-										fmt.Println(err.Error())
-										return
-									}
-
-									fmt.Println(string(stdout))
-								} else {
-									slog.Error("generating api types", slog.Any("error", err))
+								if err != nil {
+									fmt.Println(err.Error())
+									return
 								}
 
-								// Print the output
-
+								fmt.Println(string(stdout))
 							} else {
-
-								slog.Info("generating page types")
-
+								slog.Error("generating api types", slog.Any("error", err))
 							}
+
+							// Print the output
+
+						} else {
+
+							slog.Info("generating page types")
+
 						}
 					}
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"log"
 	"strings"
 )
 
@@ -28,14 +29,21 @@ func (g *PackageGenerator) Generate() (string, error) {
 
 		ast.Inspect(file, func(n ast.Node) bool {
 			switch x := n.(type) {
+			case *ast.FuncDecl:
+				log.Println("------------------ Func Decl ------------------")
 
 			// GenDecl can be an import, type, var, or const expression
 			case *ast.GenDecl:
+				log.Println(n)
+
 				if x.Tok == token.IMPORT {
 					return false
 				}
 				isEmit := false
 				if x.Tok == token.VAR {
+
+					log.Println("Var", x)
+
 					isEmit = g.isEmitVar(x)
 					if !isEmit {
 						return false
@@ -46,22 +54,19 @@ func (g *PackageGenerator) Generate() (string, error) {
 					g.writeFileSourceHeader(s, filepaths[i], file)
 					first = false
 				}
-				if isEmit {
-					g.emitVar(s, x)
-					return false
-				}
+
 				g.writeGroupDecl(s, x)
 
 				for _, spec := range x.Specs {
 					ts, ok := spec.(*ast.TypeSpec)
 					if ok && ts.Name.IsExported() {
-
 						typespecmap[ts.Name.Name] = ts
 						availableImports = append(availableImports, ts.Name.Name)
-
 					}
+
 				}
 				return false
+
 			}
 			return true
 
@@ -72,7 +77,9 @@ func (g *PackageGenerator) Generate() (string, error) {
 			case *ast.FuncDecl:
 				a := &FunctionDoc{}
 				a.ParseFromFuncDecl(x)
-				a.Generate(s)
+				if a.ShouldGenerateRequest {
+					a.Generate(s)
+				}
 				availableImports = append(availableImports, a.LowerName)
 			}
 			return true
@@ -91,7 +98,7 @@ type FunctionDoc struct {
 	Body                    string
 	Response                string
 	Path                    string
-	SkipRequestGeneration   bool
+	ShouldGenerateRequest   bool
 	ShouldGenerateForm      bool
 	FetchParams             string
 	FetchParamsWithOutTypes string
@@ -100,24 +107,26 @@ type FunctionDoc struct {
 
 func (g *FunctionDoc) ParseFromFuncDecl(f *ast.FuncDecl) {
 	if f == nil {
-		g.SkipRequestGeneration = true
+		g.ShouldGenerateRequest = false
 		return
 	}
 
 	if f.Doc == nil {
-		g.SkipRequestGeneration = true
+		g.ShouldGenerateRequest = false
 		return
 	}
 
 	if f.Doc.Text() == "" {
-		g.SkipRequestGeneration = true
+		g.ShouldGenerateRequest = false
 		return
 	}
 
 	for _, c := range f.Doc.List {
 
 		text := strings.Replace(c.Text, "//", "", 1)
-
+		if strings.Contains(text, "@api") {
+			g.ShouldGenerateRequest = true
+		}
 		if strings.Contains(text, "@method") {
 			g.Method = strings.TrimSpace(strings.Replace(text, "@method", "", -1))
 		}
@@ -148,8 +157,8 @@ func (g *FunctionDoc) ParseFromFuncDecl(f *ast.FuncDecl) {
 			g.Name = name
 		}
 
-		if strings.Contains(text, "@skip") {
-			g.SkipRequestGeneration = true
+		if strings.Contains(text, "@api") {
+			g.ShouldGenerateRequest = true
 		}
 
 		if strings.Contains(text, "@generateform") {
@@ -215,7 +224,7 @@ func (g *FunctionDoc) Generate(s *strings.Builder) {
 	body := ""
 	if g.Body != "" {
 		if g.ContentType == "multipart/formdata" {
-			s.WriteString("const formData = ShouldGenerateFormData(data)\n")
+			s.WriteString("const formData = generateFormdata(data)\n")
 			body = "formData"
 		} else {
 			body = "data"

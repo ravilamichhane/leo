@@ -59,37 +59,3 @@ func generateRoute(name string, method string, paginated bool) {
 	}
 
 }
-
-// func WriteFile(path string, content string, data RouteData) {
-
-// 	// Write file
-
-// 	template, err := template.New(uuid.New().String()).Parse(content)
-
-// 	if err != nil {
-// 		slog.Error("ERROR PARSING TEMPLATE", slog.Any("error", err))
-// 		os.Exit(1)
-// 	}
-
-// 	f, err := os.Create(path)
-
-// 	if err != nil {
-
-// 		panic(err)
-// 	}
-
-// 	defer f.Close()
-
-// 	file, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
-
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	defer file.Close()
-// 	err = template.Execute(file, data)
-
-// 	if err != nil {
-// 		slog.Error("ERROR WRITING FILE", slog.Any("error", err))
-// 	}
-// }

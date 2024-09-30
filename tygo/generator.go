@@ -3,8 +3,11 @@ package tygo
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"golang.org/x/tools/go/packages"
 )
@@ -81,7 +84,7 @@ func (g *Tygo) Generate() error {
 	return nil
 }
 
-func (g *Tygo) GenerateForm(name string) error {
+func (g *Tygo) GenerateForm() error {
 	pkgs, err := packages.Load(&packages.Config{
 		Mode: packages.NeedSyntax | packages.NeedFiles,
 	}, g.conf.PackageNames()...)
@@ -106,7 +109,7 @@ func (g *Tygo) GenerateForm(name string) error {
 			pkg:     pkg,
 		}
 		g.packageGenerators[pkg.PkgPath] = pkgGen
-		code, err := pkgGen.GenerateForm(name)
+		code, err := pkgGen.GenerateForm()
 		if err != nil {
 			return err
 		}
@@ -117,10 +120,33 @@ func (g *Tygo) GenerateForm(name string) error {
 			return nil
 		}
 
-		err = ioutil.WriteFile(outPath, []byte(code), 0664)
+		cwd, err := os.Getwd()
 		if err != nil {
+			panic(err)
+		}
+
+		path := strings.Split(cwd, "app/routes")
+		if len(path) < 2 {
+			log.Println("Invalid path")
+		}
+
+		basePath := path[0]
+
+		err = os.WriteFile(outPath, []byte(code), 0664)
+		if err != nil {
+			fmt.Println(err.Error())
+			return err
+		}
+
+		cmd := exec.Command(basePath+"./node_modules/.bin/prettier", pkgGen.conf.OutputPath, "--write")
+		stdout, err := cmd.Output()
+		// Print the output
+		fmt.Println(string(stdout))
+		if err != nil {
+
 			return nil
 		}
+
 	}
 	return nil
 }

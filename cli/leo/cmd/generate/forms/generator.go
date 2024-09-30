@@ -5,15 +5,27 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/ravilmc/leo/tygo"
 )
 
-func generate(name string, methodname string) {
+func generate() {
 
-	file, err := os.Open("go.mod")
+	cwd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+
+	path := strings.Split(cwd, "app/routes")
+	if len(path) < 2 {
+		log.Println("Invalid path")
+		return
+	}
+
+	basePath := path[0]
+
+	file, err := os.Open(basePath + "go.mod")
 	if err != nil {
 		fmt.Println("No mod file found:", err)
 		return
@@ -45,13 +57,14 @@ func generate(name string, methodname string) {
 	gen := tygo.New(&tygo.Config{
 		Packages: []*tygo.PackageConfig{
 			{
-				Path:       basepackageName + "/app/controllers/" + strings.ToLower(name) + "controller",
-				OutputPath: "resources/services/" + strings.ToLower(name) + "/" + methodname + "Form.tsx",
+				Path:       basepackageName + "/app/routes" + path[1],
+				OutputPath: "app/form.tsx",
 				Frontmatter: `
-import { Fetcher, handleResponseError } from "./fetcher";
+import { Fetcher } from "@/lib/fetcher";
 import {useForm} from "react-hook-form";
-import { SafeParse } from "./safeparse";
-import { generateFormData } from "./formdata";
+import { SafeParse } from "@lib/utils";
+import { handleResponseError } from "@/lib/handle-error";
+
 import { useMutation } from "@tanstack/react-query";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
@@ -66,27 +79,13 @@ import { TextInput } from "@/components/forms/text-input";
 				TypeMappings: map[string]string{
 					"time.Time": "string",
 				},
-				ExcludeFiles: []string{
-					strings.ToLower(name) + "controller.go",
-				},
 			},
 		},
 	})
-	err = gen.GenerateForm(methodname)
+	err = gen.GenerateForm()
 
 	if err != nil {
 		panic(err)
 	}
-
-	cmd := exec.Command("./node_modules/.bin/prettier", "resources/services/"+strings.ToLower(name)+"/"+methodname+"Form.tsx", "--write")
-	stdout, err := cmd.Output()
-
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Print the output
-	fmt.Println(string(stdout))
 
 }
